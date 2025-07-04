@@ -1,7 +1,7 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Search, Moon } from 'lucide-react';
+import { ArrowLeft, Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -25,17 +25,32 @@ const termData = {
 const TermDetail = () => {
   const { id } = useParams<{ id: string }>();
   const term = id ? termData[id as keyof typeof termData] : null;
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Apply dark mode class to document
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
 
   if (!term) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-background text-foreground">
         {/* Header */}
-        <header className="border-b border-gray-100 bg-white">
+        <header className="border-b border-border bg-background">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex items-center justify-between">
-              <Link to="/" className="text-2xl font-semibold text-gray-900">AI Glossary</Link>
-              <Button variant="ghost" size="icon" className="text-gray-500">
-                <Moon className="h-4 w-4" />
+              <Link to="/" className="text-2xl font-semibold text-foreground">AI Glossary</Link>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
             </div>
           </div>
@@ -43,10 +58,10 @@ const TermDetail = () => {
 
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
-            <h1 className="text-2xl font-semibold text-gray-900 mb-4">Term not found</h1>
-            <p className="text-gray-600 mb-8">The term you're looking for doesn't exist or has been moved.</p>
+            <h1 className="text-2xl font-semibold text-foreground mb-4">Term not found</h1>
+            <p className="text-muted-foreground mb-8">The term you're looking for doesn't exist or has been moved.</p>
             <Link to="/">
-              <Button className="bg-gray-900 hover:bg-gray-800">
+              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Glossary
               </Button>
@@ -58,14 +73,19 @@ const TermDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
-      <header className="border-b border-gray-100 bg-white">
+      <header className="border-b border-border bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <Link to="/" className="text-2xl font-semibold text-gray-900">AI Glossary</Link>
-            <Button variant="ghost" size="icon" className="text-gray-500">
-              <Moon className="h-4 w-4" />
+            <Link to="/" className="text-2xl font-semibold text-foreground">AI Glossary</Link>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
           </div>
         </div>
@@ -75,7 +95,7 @@ const TermDetail = () => {
         {/* Back Button */}
         <div className="mb-8">
           <Link to="/">
-            <Button variant="ghost" className="text-gray-600 hover:text-gray-900 -ml-4">
+            <Button variant="ghost" className="text-muted-foreground hover:text-foreground -ml-4">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Glossary
             </Button>
@@ -83,29 +103,29 @@ const TermDetail = () => {
         </div>
 
         {/* Term Detail Card */}
-        <Card className="border border-gray-100 bg-white">
+        <Card className="border border-border bg-card">
           <CardHeader className="pb-6">
-            <CardTitle className="text-3xl font-semibold text-gray-900">
+            <CardTitle className="text-3xl font-semibold text-card-foreground">
               {term.term}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-3">Definition</h3>
-              <p className="text-gray-700 leading-relaxed">{term.definition}</p>
+              <h3 className="text-lg font-medium text-card-foreground mb-3">Definition</h3>
+              <p className="text-muted-foreground leading-relaxed">{term.definition}</p>
             </div>
 
             {term.fullDescription && (
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-3">Detailed Explanation</h3>
-                <p className="text-gray-700 leading-relaxed">{term.fullDescription}</p>
+                <h3 className="text-lg font-medium text-card-foreground mb-3">Detailed Explanation</h3>
+                <p className="text-muted-foreground leading-relaxed">{term.fullDescription}</p>
               </div>
             )}
 
             {term.example && (
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-3">Examples</h3>
-                <p className="text-gray-700 leading-relaxed">{term.example}</p>
+                <h3 className="text-lg font-medium text-card-foreground mb-3">Examples</h3>
+                <p className="text-muted-foreground leading-relaxed">{term.example}</p>
               </div>
             )}
           </CardContent>
@@ -113,10 +133,10 @@ const TermDetail = () => {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-gray-100 bg-white mt-16">
+      <footer className="border-t border-border bg-background mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               © 2024 AI Glossary. Making AI terminology accessible.
             </p>
           </div>

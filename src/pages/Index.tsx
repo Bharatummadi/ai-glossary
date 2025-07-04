@@ -1,6 +1,6 @@
 
-import React, { useState, useMemo } from 'react';
-import { Search, Moon } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Search, Moon, Sun, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -144,6 +144,16 @@ const Index = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLetter, setSelectedLetter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Apply dark mode class to document
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
 
   const filteredTerms = useMemo(() => {
     let filtered = aiTerms;
@@ -182,6 +192,14 @@ const Index = () => {
     setCurrentPage(1);
   };
 
+  const clearFilters = () => {
+    setSearchTerm('');
+    setSelectedLetter('');
+    setCurrentPage(1);
+  };
+
+  const hasActiveFilters = searchTerm || selectedLetter;
+
   const truncateText = (text: string, lines: number = 5) => {
     const words = text.split(' ');
     const wordsPerLine = 12; // Approximate words per line
@@ -193,90 +211,106 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="border-b border-gray-100 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-semibold text-gray-900">AI Glossary</h1>
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  type="text"
-                  placeholder="Search terms..."
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                  className="pl-10 pr-4 w-80 border-gray-200 focus:border-gray-300 focus:ring-gray-300"
-                />
-              </div>
-              <Button variant="ghost" size="icon" className="text-gray-500">
-                <Moon className="h-4 w-4" />
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
+        {/* Header */}
+        <header className="bg-background border-b border-border">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center justify-between">
+              <h1 className="text-2xl font-semibold text-foreground">AI Glossary</h1>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
             </div>
           </div>
+        </header>
+
+        {/* Search Section */}
+        <div className="bg-background px-4 sm:px-6 lg:px-8 py-6">
+          <div className="max-w-7xl mx-auto">
+            {/* Large Search Bar */}
+            <div className="max-w-2xl mx-auto mb-6">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+                <Input
+                  type="text"
+                  placeholder="Search for AI terms..."
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  className="pl-12 pr-4 py-4 text-lg border-border focus:border-ring focus:ring-ring rounded-lg bg-background"
+                />
+                <Button 
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-primary hover:bg-primary/90 text-primary-foreground"
+                  size="sm"
+                >
+                  Search
+                </Button>
+              </div>
+            </div>
+
+            {/* Clear Filters Button */}
+            {hasActiveFilters && (
+              <div className="text-center mb-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearFilters}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Clear filters
+                </Button>
+              </div>
+            )}
+
+            {/* Alphabet Navigation */}
+            <div className="flex flex-wrap justify-center gap-2">
+              {alphabet.map((letter) => {
+                const hasTerms = aiTerms.some(term => 
+                  term.term.charAt(0).toUpperCase() === letter
+                );
+                return (
+                  <button
+                    key={letter}
+                    onClick={() => handleLetterClick(letter)}
+                    className={`px-3 py-2 text-sm font-medium rounded transition-colors ${
+                      selectedLetter === letter
+                        ? 'bg-primary text-primary-foreground'
+                        : hasTerms
+                        ? 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                        : 'text-muted-foreground/50 cursor-not-allowed'
+                    }`}
+                    disabled={!hasTerms}
+                  >
+                    {letter}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
-      </header>
+      </div>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <h2 className="text-4xl sm:text-5xl font-light text-gray-900 mb-4 leading-tight">
+          <h2 className="text-4xl sm:text-5xl font-light text-foreground mb-4 leading-tight">
             Making AI terms <span className="font-medium">less intimidating</span>,<br />
             one word at a time.
           </h2>
-          
-          {/* Large Search Bar */}
-          <div className="max-w-2xl mx-auto mt-8 mb-8">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-              <Input
-                type="text"
-                placeholder="Search for AI terms..."
-                value={searchTerm}
-                onChange={handleSearchChange}
-                className="pl-12 pr-4 py-4 text-lg border-gray-200 focus:border-gray-300 focus:ring-gray-300 rounded-lg"
-              />
-              <Button 
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gray-600 hover:bg-gray-700"
-                size="sm"
-              >
-                Search
-              </Button>
-            </div>
-          </div>
-
-          {/* Alphabet Navigation */}
-          <div className="flex flex-wrap justify-center gap-2 mb-8">
-            {alphabet.map((letter) => {
-              const hasTerms = aiTerms.some(term => 
-                term.term.charAt(0).toUpperCase() === letter
-              );
-              return (
-                <button
-                  key={letter}
-                  onClick={() => handleLetterClick(letter)}
-                  className={`px-3 py-2 text-sm font-medium rounded transition-colors ${
-                    selectedLetter === letter
-                      ? 'bg-gray-900 text-white'
-                      : hasTerms
-                      ? 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                      : 'text-gray-300 cursor-not-allowed'
-                  }`}
-                  disabled={!hasTerms}
-                >
-                  {letter}
-                </button>
-              );
-            })}
-          </div>
         </div>
 
         {/* Results Count */}
-        {(searchTerm || selectedLetter) && (
+        {hasActiveFilters && (
           <div className="mb-6">
-            <p className="text-gray-600 text-center">
+            <p className="text-muted-foreground text-center">
               {filteredTerms.length} {filteredTerms.length === 1 ? 'term' : 'terms'} found
               {selectedLetter && ` starting with "${selectedLetter}"`}
               {searchTerm && ` matching "${searchTerm}"`}
@@ -287,19 +321,19 @@ const Index = () => {
         {/* Terms Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
           {paginatedTerms.map((term) => (
-            <Card key={term.id} className="border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all duration-200 bg-white">
+            <Card key={term.id} className="border border-border hover:border-ring hover:shadow-md transition-all duration-200 bg-card">
               <CardHeader className="pb-3">
-                <CardTitle className="text-lg font-semibold text-gray-900 leading-tight">
+                <CardTitle className="text-lg font-semibold text-card-foreground leading-tight">
                   {term.term}
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
-                <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                <p className="text-muted-foreground text-sm leading-relaxed mb-4">
                   {truncateText(term.definition)}
                 </p>
                 <Link 
                   to={`/term/${term.id}`}
-                  className="inline-flex items-center text-sm font-medium text-gray-900 hover:text-gray-700 transition-colors"
+                  className="inline-flex items-center text-sm font-medium text-foreground hover:text-muted-foreground transition-colors"
                 >
                   Read more →
                 </Link>
@@ -348,17 +382,17 @@ const Index = () => {
         {/* No Results */}
         {filteredTerms.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-xl text-gray-500 mb-2">No terms found</p>
-            <p className="text-gray-400">Try searching for a different term or select a different letter.</p>
+            <p className="text-xl text-muted-foreground mb-2">No terms found</p>
+            <p className="text-muted-foreground">Try searching for a different term or select a different letter.</p>
           </div>
         )}
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-gray-100 bg-white">
+      <footer className="border-t border-border bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               © 2024 AI Glossary. Making AI terminology accessible.
             </p>
           </div>
