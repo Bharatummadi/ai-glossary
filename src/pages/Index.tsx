@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { Search, Moon, Sun, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -145,6 +144,7 @@ const Index = () => {
   const [selectedLetter, setSelectedLetter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [showStickyHeader, setShowStickyHeader] = useState(false);
 
   // Apply dark mode class to document
   useEffect(() => {
@@ -154,6 +154,20 @@ const Index = () => {
       document.documentElement.classList.remove('dark');
     }
   }, [isDarkMode]);
+
+  // Handle scroll to show/hide sticky header
+  useEffect(() => {
+    const handleScroll = () => {
+      const heroSection = document.getElementById('hero-section');
+      if (heroSection) {
+        const rect = heroSection.getBoundingClientRect();
+        setShowStickyHeader(rect.bottom < 0);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const filteredTerms = useMemo(() => {
     let filtered = aiTerms;
@@ -212,48 +226,51 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Sticky Header */}
-      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
-        {/* Header */}
-        <header className="bg-background border-b border-border">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-semibold text-foreground">AI Glossary</h1>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => setIsDarkMode(!isDarkMode)}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              </Button>
-            </div>
+      {/* Regular Header */}
+      <header className="bg-background border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-semibold text-foreground">AI Glossary</h1>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
           </div>
-        </header>
+        </div>
+      </header>
 
-        {/* Search Section */}
-        <div className="bg-background px-4 sm:px-6 lg:px-8 py-6">
-          <div className="max-w-7xl mx-auto">
-            {/* Large Search Bar */}
-            <div className="max-w-2xl mx-auto mb-6">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
-                <Input
-                  type="text"
-                  placeholder="Search for AI terms..."
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                  className="pl-12 pr-4 py-4 text-lg border-border focus:border-ring focus:ring-ring rounded-lg bg-background"
-                />
+      {/* Sticky Header - Only visible when scrolled */}
+      {showStickyHeader && (
+        <div className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="text-xl font-semibold text-foreground">AI Glossary</h1>
+              <div className="flex items-center gap-4">
+                <div className="relative max-w-md">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Input
+                    type="text"
+                    placeholder="Search for AI terms..."
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                    className="pl-10 pr-4 py-2 border-border focus:border-ring focus:ring-ring bg-background"
+                  />
+                </div>
                 <Button 
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-primary hover:bg-primary/90 text-primary-foreground"
-                  size="sm"
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => setIsDarkMode(!isDarkMode)}
+                  className="text-muted-foreground hover:text-foreground"
                 >
-                  Search
+                  {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                 </Button>
               </div>
             </div>
-
+            
             {/* Clear Filters Button */}
             {hasActiveFilters && (
               <div className="text-center mb-4">
@@ -295,18 +312,83 @@ const Index = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Hero Section */}
+      <div id="hero-section" className="bg-background px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-7xl mx-auto">
+          {/* Hero Text */}
+          <div className="text-center mb-12">
+            <h2 className="text-4xl sm:text-5xl font-light text-foreground mb-8 leading-tight">
+              Making AI terms <span className="font-medium">less intimidating</span>,<br />
+              one word at a time.
+            </h2>
+          </div>
+
+          {/* Large Search Bar */}
+          <div className="max-w-2xl mx-auto mb-6">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+              <Input
+                type="text"
+                placeholder="Search for AI terms..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                className="pl-12 pr-4 py-4 text-lg border-border focus:border-ring focus:ring-ring rounded-lg bg-background"
+              />
+              <Button 
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-primary hover:bg-primary/90 text-primary-foreground"
+                size="sm"
+              >
+                Search
+              </Button>
+            </div>
+          </div>
+
+          {/* Clear Filters Button */}
+          {hasActiveFilters && (
+            <div className="text-center mb-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearFilters}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4 mr-2" />
+                Clear filters
+              </Button>
+            </div>
+          )}
+
+          {/* Alphabet Navigation */}
+          <div className="flex flex-wrap justify-center gap-2">
+            {alphabet.map((letter) => {
+              const hasTerms = aiTerms.some(term => 
+                term.term.charAt(0).toUpperCase() === letter
+              );
+              return (
+                <button
+                  key={letter}
+                  onClick={() => handleLetterClick(letter)}
+                  className={`px-3 py-2 text-sm font-medium rounded transition-colors ${
+                    selectedLetter === letter
+                      ? 'bg-primary text-primary-foreground'
+                      : hasTerms
+                      ? 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                      : 'text-muted-foreground/50 cursor-not-allowed'
+                  }`}
+                  disabled={!hasTerms}
+                >
+                  {letter}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Hero Section */}
-        <div className="text-center mb-12">
-          <h2 className="text-4xl sm:text-5xl font-light text-foreground mb-4 leading-tight">
-            Making AI terms <span className="font-medium">less intimidating</span>,<br />
-            one word at a time.
-          </h2>
-        </div>
-
+      <main className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 ${showStickyHeader ? 'pt-48' : ''}`}>
         {/* Results Count */}
         {hasActiveFilters && (
           <div className="mb-6">
