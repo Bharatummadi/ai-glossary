@@ -15,7 +15,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter basename="/ai-glossary">
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/term/:id" element={<TermDetail />} />
