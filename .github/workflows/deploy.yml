@@ -22,15 +22,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       - uses: actions/setup-node@v4
         with:
           node-version: 18
           cache: npm
+
       - run: npm ci
       - run: npm run build
       - run: cp dist/index.html dist/404.html
-      - uses: actions/configure-pages@v5
-      - uses: actions/deploy-pages@v4
-        id: deployment
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-artifact@v4
         with:
-          artifact_path: dist
+          name: github-pages
+          path: dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
