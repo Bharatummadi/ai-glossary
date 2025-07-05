@@ -1,3 +1,4 @@
+import './index.css'; // or './App.css' if that's your global CSS
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
